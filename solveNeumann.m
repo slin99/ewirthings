@@ -26,11 +26,10 @@ dg(end,:) = dg(end,:)*1/2;
 % todo nicer component wise mult with ones(1,n)*1/2 thus corners -> 1/4
 d = dg(:);
 Ah = 1/(u_h*u_h) * ((kron(eye(n,n),T))+kron(TT,eye(n,n)));
+Ah = [Ah;ones(1,n*n)];
 orthProject = fh-dot(d,fh)/norm(d,"inf")^2 * d;
-
+orthProject = [orthProject;0];
 u_h =  mldivide(Ah,orthProject);
 %disp(u_h);
 surf(reshape(u_h,n,n));
 %disp(Ah);
-
-end
