@@ -1,6 +1,5 @@
 function [u_h,err] =solveNeumann(n,w,plot)
 h = 1/(n+1);
-u_h = 1;
 %n=n+2 needed for the generation of T 
 n = n+2;
 X1 = 0:h:1;
@@ -25,11 +24,27 @@ dg(end,:) = dg(end,:)*1/2;
 
 % todo nicer component wise mult with ones(1,n)*1/2 thus corners -> 1/4
 d = dg(:);
-Ah = 1/(u_h*u_h) * ((kron(eye(n,n),T))+kron(TT,eye(n,n)));
+Ah = 1/(h*h) * ((kron(eye(n,n),T))+kron(TT,eye(n,n)));
 Ah = [Ah;ones(1,n*n)];
-orthProject = fh-dot(d,fh)/norm(d,"inf")^2 * d;
+orthProjector =  @(x) x-dot(d,x)/norm(d,"inf")^2 * d;
+orthProject=  orthProjector(fh);
 orthProject = [orthProject;0];
 u_h =  mldivide(Ah,orthProject);
+%now we do error estimation
+uGrid= u(xg,yg);
+uGridVector= uGrid(:);
+errV = orthProjector(uGridVector)-u_h;
+err = norm(errV,"inf");
 %disp(u_h);
-surf(reshape(u_h,n,n));
 %disp(Ah);
+
+if plot ~= "false"
+    hold on
+    tiledlayout(1,2)
+    nexttile
+    surf(reshape(errV,n,n));
+    title("error")
+    nexttile
+    surf(reshape(u_h,n,n));
+    title("Solution")
+end
